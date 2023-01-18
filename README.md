@@ -1,4 +1,6 @@
-# Feistel_Encryption_Assembly
+# Feistel Encryptor in HDL and HACK Assembly
+### by Christian Constantin Pustianu
+
 This was a university coursework on writing complex low-level code, namely a working Feistel cipher program that takes plaintext and outputs ciphertext.
 It contains an HDL version (the .hdl file) along with a HACK Assembly version (the .asm file) of the implementation, plus code for testing and comparing the output.
 
