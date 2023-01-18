@@ -1,0 +1,88 @@
+CHIP FeistelEncryption {
+    IN plaintext[16], key[8];
+    OUT ciphertext[16];
+
+    PARTS:
+    // Split plaintext into L0 and R0
+    And16(x[0..7]=plaintext[0..7], y=true, out[0..7]=right0);
+    And16(x[0..7]=plaintext[8..15], y=true, out[0..7]=left0);
+
+    // Key rotation 1 => K1
+    And16(x[0]=key[7], x[1]=key[0], x[2]=key[1], x[3]=key[2], x[4]=key[3], x[5]=key[4], x[6]=key[5], x[7]=key[6], y=true, out[0..7]=key1);
+    // Key rotation 2 => K2
+    And16(x[0]=key[6], x[1]=key[7], x[2]=key[0], x[3]=key[1], x[4]=key[2], x[5]=key[3], x[6]=key[4], x[7]=key[5], y=true, out[0..7]=key2);
+    // Key rotation 3 => K3
+    And16(x[0]=key[5], x[1]=key[6], x[2]=key[7], x[3]=key[0], x[4]=key[1], x[5]=key[2], x[6]=key[3], x[7]=key[4], y=true, out[0..7]=key3);
+    
+    // L1 = R0
+    And16(x[0..7]=right0, y=true, out[0..7]=left1);
+
+    // R1 = L0 Xor (R0 Xor K0)
+    // Xor8(x=right0, y=key, out=function0);
+    Not16(x[0..7]=right0, out[0..7]=notright0);
+    Not16(x[0..7]=key, out[0..7]=notkey0);
+    And16(x[0..7]=right0, y[0..7]=notkey0, out[0..7]=p01);
+    And16(x[0..7]=notright0, y[0..7]=key, out[0..7]=p02);
+    Or16(x[0..7]=p01, y[0..7]=p02, out[0..7]=function0);
+
+    // Xor8(x=left0, y=function0, out=right1);
+    Not16(x[0..7]=left0, out[0..7]=notleft0);
+    Not16(x[0..7]=function0, out[0..7]=notfunction0);
+    And16(x[0..7]=left0, y[0..7]=notfunction0, out[0..7]=p03);
+    And16(x[0..7]=notleft0, y[0..7]=function0, out[0..7]=p04);
+    Or16(x[0..7]=p03, y[0..7]=p04, out[0..7]=right1);
+    
+    // L2 = R1
+    And16(x[0..7]=right1, y=true, out[0..7]=left2);
+    // R2 = L1 Xor (R1 Xor K1)
+    // Xor8(x=right1, y=key1, out=function1);
+    Not16(x[0..7]=right1, out[0..7]=notright1);
+    Not16(x[0..7]=key1, out[0..7]=notkey1);
+    And16(x[0..7]=right1, y[0..7]=notkey1, out[0..7]=p11);
+    And16(x[0..7]=notright1, y[0..7]=key1, out[0..7]=p12);
+    Or16(x[0..7]=p11, y[0..7]=p12, out[0..7]=function1);
+
+    // Xor8(x=left1, y=function1, out=right2);
+    Not16(x[0..7]=left1, out[0..7]=notleft1);
+    Not16(x[0..7]=function1, out[0..7]=notfunction1);
+    And16(x[0..7]=left1, y[0..7]=notfunction1, out[0..7]=p13);
+    And16(x[0..7]=notleft1, y[0..7]=function1, out[0..7]=p14);
+    Or16(x[0..7]=p13, y[0..7]=p14, out[0..7]=right2);
+
+    // L3 = R2
+    And16(x[0..7]=right2, y=true, out[0..7]=left3);
+    // R3 = L2 Xor (R2 Xor K2)
+    // Xor8(x=right2, y=key2, out=function2);
+    Not16(x[0..7]=right2, out[0..7]=notright2);
+    Not16(x[0..7]=key2, out[0..7]=notkey2);
+    And16(x[0..7]=right2, y[0..7]=notkey2, out[0..7]=p21);
+    And16(x[0..7]=notright2, y[0..7]=key2, out[0..7]=p22);
+    Or16(x[0..7]=p21, y[0..7]=p22, out[0..7]=function2);
+
+    // Xor8(x=left2, y=function2, out=right3);
+    Not16(x[0..7]=left2, out[0..7]=notleft2);
+    Not16(x[0..7]=function2, out[0..7]=notfunction2);
+    And16(x[0..7]=left2, y[0..7]=notfunction2, out[0..7]=p23);
+    And16(x[0..7]=notleft2, y[0..7]=function2, out[0..7]=p24);
+    Or16(x[0..7]=p23, y[0..7]=p24, out[0..7]=right3);
+
+    // L4 = R3
+    And16(x[0..7]=right3, y=true, out[0..7]=left4);
+    // R4 = L3 Xor (R3 Xor K3)
+    // Xor8(x=right3, y=key3, out=function3);
+    Not16(x[0..7]=right3, out[0..7]=notright3);
+    Not16(x[0..7]=key3, out[0..7]=notkey3);
+    And16(x[0..7]=right3, y[0..7]=notkey3, out[0..7]=p31);
+    And16(x[0..7]=notright3, y[0..7]=key3, out[0..7]=p32);
+    Or16(x[0..7]=p31, y[0..7]=p32, out[0..7]=function3);
+
+    // Xor8(x=left3, y=function3, out=right4);
+    Not16(x[0..7]=left3, out[0..7]=notleft3);
+    Not16(x[0..7]=function3, out[0..7]=notfunction3);
+    And16(x[0..7]=left3, y[0..7]=notfunction3, out[0..7]=p33);
+    And16(x[0..7]=notleft3, y[0..7]=function3, out[0..7]=p34);
+    Or16(x[0..7]=p33, y[0..7]=p34, out[0..7]=right4);
+
+    // ciphertext C=L4R4
+    And16(x[0..7]=right4, x[8..15]=left4, y=true, out=ciphertext);
+}
